@@ -13,41 +13,46 @@ handleRequest();
 
 <!DOCTYPE html>
 <html lang="en">
-    
-    <head>
-        <?php htmlHead() ?>
-        <style>
-            html,
-            body {
+
+<head>
+    <?php htmlHead() ?>
+    <style>
+        html,
+        body {
             height: 100%;
         }
-        
+
         .main-wrapper {
             min-height: calc(100vh - 120px);
             /* adjust based on header/footer height */
         }
-        </style>
+    </style>
 </head>
 
 <body class="bg-light d-flex flex-column">
-    
+
     <?php displayHeader(); ?>
-    
+
     <div class="main-wrapper d-flex align-items-center justify-content-center">
         <div class="container" style="max-width: 700px;">
-            
+
             <?php
             if (!gameStarted()) {
                 startForm();
-                } else {
-                    gameForm();
-                    }
-                    ?>
+            } else {
+                gameForm();
+            }
+            ?>
 
-</div>
-</div>
+        </div>
+    </div>
 
-<?php displayFooter(); ?>
+    <?php displayFooter(); ?>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 
 </body>
 
