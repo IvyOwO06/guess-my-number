@@ -50,6 +50,7 @@ function init()
             'message' => '',
             'history' => [],
             'difficulty' => 0,
+            'maxTime' => 0,
             'finalTime' => 0
         ];
     }
@@ -74,6 +75,8 @@ function handleStart()
     $_SESSION['game']['gameStarted'] = true;
     $_SESSION['game']['min'] = $_POST['min'];
     $_SESSION['game']['max'] = $_POST['max'];
+    $_SESSION['game']['maxAttempts'] = $_POST['attempts'];
+    $_SESSION['game']['maxTime'] = $_POST['time'];
     $difficulty = $_SESSION['game']['difficulty'] = $_POST['difficulty'];
 
     switch ($difficulty) {
@@ -96,7 +99,7 @@ function handleStart()
     $_SESSION['game']['startTime'] = time();
     $_SESSION['game']['attempts'] = 0;
     $_SESSION['game']['history'] = [];
-    $_SESSION['game']['message'] = '';
+    $_SESSION['message'] = '';
 }
 
 /**
@@ -104,32 +107,38 @@ function handleStart()
  */
 function handleGuess()
 {
+    updateTimer();
     // guess game logic
     $guess = $_POST['guess'];
     // increase attempts
     $_SESSION['game']['attempts']++;
     // compare secret number with user input
-    if ($guess < $_SESSION['game']['target'] && $_SESSION['game']['attempts'] <= $_SESSION['game']['maxAttempts']) {
-        $_SESSION['game']['message'] = 'Too low!';
+    if ($guess < $_SESSION['game']['target'] && $_SESSION['game']['attempts'] < $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
+        $_SESSION['message'] = 'Too low!';
         // add some time penalty for wrong guess
         addToHistory($guess . ' (too low)');
-    } elseif ($guess > $_SESSION['game']['target'] && $_SESSION['game']['attempts'] <= $_SESSION['game']['maxAttempts']) {
-        $_SESSION['game']['message'] = 'Too high!';
+        $_SESSION['game']['maxTime'] += $_SESSION['game']['elapsedTime'];
+    } elseif ($guess > $_SESSION['game']['target'] && $_SESSION['game']['attempts'] < $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
+        $_SESSION['message'] = 'Too high!';
         // add some time penalty for wrong guess
         addToHistory($guess . ' (too high)');
-    } elseif ($guess == $_SESSION['game']['target'] && $_SESSION['game']['attempts'] <= $_SESSION['game']['maxAttempts']) {
+        $_SESSION['game']['maxTime'] += $_SESSION['game']['elapsedTime'];
+    } elseif ($guess == $_SESSION['game']['target'] && $_SESSION['game']['attempts'] <= $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
         $_SESSION['game']['finalTime'] = time() - $_SESSION['game']['startTime'];
-        $_SESSION['game']['message'] = 'Congratulations! You guessed the number in ' . $_SESSION['game']['attempts'] . ' attempts and ' . $_SESSION['game']['finalTime'] . ' seconds!';
+        $_SESSION['message'] = 'Congratulations! You guessed the number in ' . $_SESSION['game']['attempts'] . ' attempts and ' . $_SESSION['game']['finalTime'] . ' seconds!';
 
         // instead of destroying the whole session, only remove the game data
         $message = $_SESSION['game']['message'];
         unset($_SESSION['game']);
         init();
         $_SESSION['game']['message'] = $message;
-    } else {
-        $_SESSION['game']['message'] = 'Game over! You have used all your attempts. The number was ' . $_SESSION['game']['target'] . '.';
-        // add some time penalty for wrong guess
-        
+    } elseif ($_SESSION['game']['attempts'] >= $_SESSION['game']['maxAttempts']) {
+        $_SESSION['message'] = 'Game over! You have used all your attempts. The number was ' . $_SESSION['game']['target'] . '.';
+        unset($_SESSION['game']);
+
+    } elseif ($_SESSION['game']['elapsedTime'] > $_SESSION['game']['maxTime']) {
+        $_SESSION['message'] = 'Game over! You have used all your time. The number was ' . $_SESSION['game']['target'] . '.';
+        unset($_SESSION['game']);
     }
 }
 
@@ -166,9 +175,29 @@ function startForm()
         <form class="card p-4 shadow-sm" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
             <h3 class="mb-4">Start Game</h3>
 
+            <?php if (!empty($_SESSION['message'])) { ?>
+                <div class="alert alert-info">
+                    <?php echo $_SESSION['message'];
+                    ?>
+                </div>
+                <?php
+            } ?>
+
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
-                <input type="text" class="form-control" name="name" id="name" placeholder="Enter your name">
+                <?php
+                if (isset($_SESSION['user'])) {
+                    ?>
+                    <input type="text" class="form-control" name="name" id="name" value="<?= $_SESSION['user']['username'] ?>"
+                        disabled>
+
+                    <?php
+                } else {
+                    ?>
+                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter your name">
+                    <?php
+                }
+                ?>
             </div>
 
             <!-- Min & Max -->
@@ -235,9 +264,9 @@ function gameForm()
     <div class="container mt-5">
         <div class="card p-4 shadow-sm">
 
-            <?php if (!empty($_SESSION['game']['message'])): ?>
+            <?php if (!empty($_SESSION['message'])): ?>
                 <div class="alert alert-info">
-                    <?php echo $_SESSION['game']['message']; ?>
+                    <?php echo $_SESSION['message']; ?>
                 </div>
             <?php endif; ?>
 

@@ -8,51 +8,50 @@ require_once 'inc/headerFunctions.php';
 handleRequest();
 
 // quick dump to show session contents
-// dump($_SESSION);
-
-// check if the game is already started
-// if not, show start form, else show the game form
 
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <?php htmlHead() ?>
-    <style>
-        html,
-        body {
+    
+    <head>
+        <?php htmlHead() ?>
+        <style>
+            html,
+            body {
             height: 100%;
         }
-
+        
         .main-wrapper {
             min-height: calc(100vh - 120px);
             /* adjust based on header/footer height */
         }
-    </style>
+        </style>
 </head>
 
 <body class="bg-light d-flex flex-column">
-
+    
     <?php displayHeader(); ?>
-
+    
     <div class="main-wrapper d-flex align-items-center justify-content-center">
         <div class="container" style="max-width: 700px;">
-
+            
             <?php
             if (!gameStarted()) {
                 startForm();
-            } else {
-                gameForm();
-            }
-            ?>
+                } else {
+                    gameForm();
+                    }
+                    ?>
 
-        </div>
-    </div>
+</div>
+</div>
 
-    <?php displayFooter(); ?>
+<?php displayFooter(); ?>
 
 </body>
 
 </html>
+
+<?php
+// dump($_SESSION);
