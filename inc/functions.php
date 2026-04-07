@@ -47,11 +47,11 @@ function init()
             'startTime' => 0,
             'endTime' => 0,
             'elapsedTime' => 0,
-            'message' => '',
             'history' => [],
             'difficulty' => 0,
             'maxTime' => 0,
-            'finalTime' => 0
+            'finalTime' => 0,
+            'maxAttempts' => 0
         ];
     }
 }
@@ -112,31 +112,31 @@ function handleGuess()
     $guess = $_POST['guess'];
     // increase attempts
     $_SESSION['game']['attempts']++;
-    // compare secret number with user input
+
     if ($guess < $_SESSION['game']['target'] && $_SESSION['game']['attempts'] < $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
         $_SESSION['message'] = 'Too low!';
-        // add some time penalty for wrong guess
-        addToHistory($guess . ' (too low)');
-        $_SESSION['game']['maxTime'] += $_SESSION['game']['elapsedTime'];
+        addToHistory($guess);
     } elseif ($guess > $_SESSION['game']['target'] && $_SESSION['game']['attempts'] < $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
         $_SESSION['message'] = 'Too high!';
-        // add some time penalty for wrong guess
-        addToHistory($guess . ' (too high)');
-        $_SESSION['game']['maxTime'] += $_SESSION['game']['elapsedTime'];
+        addToHistory($guess);
     } elseif ($guess == $_SESSION['game']['target'] && $_SESSION['game']['attempts'] <= $_SESSION['game']['maxAttempts'] && $_SESSION['game']['elapsedTime'] <= $_SESSION['game']['maxTime']) {
+
         $_SESSION['game']['finalTime'] = time() - $_SESSION['game']['startTime'];
+
+        // add to leaderboard
+        addToLeaderboard();
+
         $_SESSION['message'] = 'Congratulations! You guessed the number in ' . $_SESSION['game']['attempts'] . ' attempts and ' . $_SESSION['game']['finalTime'] . ' seconds!';
 
-        // instead of destroying the whole session, only remove the game data
-        $message = $_SESSION['game']['message'];
         unset($_SESSION['game']);
-        init();
-        $_SESSION['game']['message'] = $message;
+
     } elseif ($_SESSION['game']['attempts'] >= $_SESSION['game']['maxAttempts']) {
+
         $_SESSION['message'] = 'Game over! You have used all your attempts. The number was ' . $_SESSION['game']['target'] . '.';
         unset($_SESSION['game']);
 
     } elseif ($_SESSION['game']['elapsedTime'] > $_SESSION['game']['maxTime']) {
+
         $_SESSION['message'] = 'Game over! You have used all your time. The number was ' . $_SESSION['game']['target'] . '.';
         unset($_SESSION['game']);
     }
@@ -146,6 +146,37 @@ function addToHistory($guess)
 {
     // add guess to history
     $_SESSION['game']['history'][] = $guess;
+}
+
+/**
+ * Adds the finished game to the leaderboard database.
+ */
+function addToLeaderboard()
+{
+    if (!isset($_SESSION['user']) || !isset($_SESSION['game'])) {
+        return; // no user or game info
+    }
+
+    // database connection
+    $con = mysqli_connect("localhost", "root", "", "guess_my_number");
+    if (mysqli_connect_errno()) {
+        $_SESSION['message'] .= " Failed to save leaderboard: " . mysqli_connect_error();
+        return;
+    }
+
+    $userId = $_SESSION['user']['id'];
+    $username = $_SESSION['user']['username'];
+    $difficulty = $_SESSION['game']['difficulty'];
+    $maxTime = $_SESSION['game']['maxTime'];
+    $attempts = $_SESSION['game']['attempts'];
+    $guesses = implode(", ", $_SESSION['game']['history']); // only numbers
+    $date = date('Y-m-d H:i:s');
+
+    $stmt = mysqli_prepare($con, "INSERT INTO leaderboard (userId, username, difficulty, `maxTime(s)`, attempts, guesses, date) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "isiiiss", $userId, $username, $difficulty, $maxTime, $attempts, $guesses, $date);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    mysqli_close($con);
 }
 
 /**
@@ -177,60 +208,35 @@ function startForm()
 
             <?php if (!empty($_SESSION['message'])) { ?>
                 <div class="alert alert-info">
-                    <?php echo $_SESSION['message'];
-                    ?>
+                    <?php echo $_SESSION['message']; ?>
                 </div>
-                <?php
-            } ?>
+            <?php } ?>
 
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
-                <?php
-                if (isset($_SESSION['user'])) {
-                    ?>
-                    <input type="text" class="form-control" name="name" id="name" value="<?= $_SESSION['user']['username'] ?>"
-                        disabled>
-
-                    <?php
-                } else {
-                    ?>
-                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter your name">
-                    <?php
-                }
-                ?>
-            </div>
-
-            <!-- Min & Max -->
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="min" class="form-label">Min:</label>
-                    <input type="number" class="form-control" name="min" id="min" min="1" value="1">
-                </div>
-                <div class="col">
-                    <label for="max" class="form-label">Max:</label>
-                    <input type="number" class="form-control" name="max" id="max" min="1" value="100">
-                </div>
+                <?php if (isset($_SESSION['user'])) { ?>
+                    <input type="text" class="form-control" value="<?= $_SESSION['user']['username'] ?>" disabled>
+                <?php } else { ?>
+                    <input type="text" class="form-control" name="name" placeholder="Enter your name">
+                <?php } ?>
             </div>
 
             <!-- Attempts & Time -->
             <div class="row mb-3">
                 <div class="col">
-                    <label for="attempts" class="form-label">Max Attempts:</label>
-                    <input type="number" class="form-control" name="attempts" id="attempts" min="1" value="5">
+                    <label class="form-label">Max Attempts:</label>
+                    <input type="number" class="form-control" name="attempts" min="1" value="5">
                 </div>
                 <div class="col">
-                    <label for="time" class="form-label">Time per Attempt (seconds):</label>
-                    <input type="number" class="form-control" name="time" id="time" min="1" value="15">
+                    <label class="form-label">Time per Attempt (seconds):</label>
+                    <input type="number" class="form-control" name="time" min="1" value="15">
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="difficulty" class="form-label">
-                    Choose a difficulty (if left on default it will use the values you put in):
-                </label>
-                <select name="difficulty" id="difficulty" class="form-select">
-                    <option value="0" selected>Default</option>
-                    <option value="1">Easy (1-50)</option>
+                <label class="form-label">Choose a difficulty:</label>
+                <select name="difficulty" class="form-select">
+                    <option value="1" selected>Easy (1-50)</option>
                     <option value="2">Medium (1-100)</option>
                     <option value="3">Hard (1-500)</option>
                 </select>
@@ -239,12 +245,8 @@ function startForm()
             <input type="hidden" name="action" value="start">
 
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    Start Game
-                </button>
-                <a href="leaderboard.php" class="btn btn-secondary flex-fill">
-                    View Leaderboard
-                </a>
+                <button class="btn btn-primary flex-fill">Start Game</button>
+                <a href="leaderboard.php" class="btn btn-secondary flex-fill">View Leaderboard</a>
             </div>
         </form>
     </div>
@@ -270,60 +272,43 @@ function gameForm()
                 </div>
             <?php endif; ?>
 
-            <?php
-            updateTimer();
-            ?>
+            <?php updateTimer(); ?>
+
             <p class="mb-3">
                 <strong>Elapsed Time:</strong>
                 <?php echo $_SESSION['game']['elapsedTime']; ?> seconds
             </p>
 
             <!-- Guess Form -->
-            <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="mt-3">
+            <form method="post">
                 <div class="input-group">
                     <input type="number" name="guess" class="form-control" min="<?php echo $_SESSION['game']['min']; ?>"
-                        max="<?php echo $_SESSION['game']['max']; ?>" placeholder="Enter your guess..." required>
-                    <button type="submit" class="btn btn-primary">
-                        Make your guess!
-                    </button>
+                        max="<?php echo $_SESSION['game']['max']; ?>" required>
+                    <button class="btn btn-primary">Guess</button>
                 </div>
                 <input type="hidden" name="action" value="guess">
             </form>
 
             <?php if (!empty($_SESSION['game']['history'])): ?>
-                <div class="mb-3">
-                    <strong>Previous Guesses:</strong>
-                    <div class="mt-2">
-                        <?php echo implode('<br>', $_SESSION['game']['history']); ?>
-                    </div>
+                <div class="mt-3">
+                    <strong>Previous Guesses:</strong><br>
+                    <?php foreach ($_SESSION['game']['history'] as $g): ?>
+                        <?php if ($g < $_SESSION['game']['target']): ?>
+                            <?= $g ?> (too low)<br>
+                        <?php elseif ($g > $_SESSION['game']['target']): ?>
+                            <?= $g ?> (too high)<br>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
-            <!-- Reset Form -->
-            <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="mt-3">
+            <form method="post" class="mt-3">
                 <input type="hidden" name="action" value="reset">
-                <button type="submit" name="reset" class="btn btn-danger w-100">
-                    Reset Game
-                </button>
+                <button class="btn btn-danger w-100">Reset</button>
             </form>
 
         </div>
     </div>
-    <?php
-}
-
-/**
- * This function will display the form to reset the game.
- */
-function resetForm()
-{
-    ?>
-    <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="mt-3">
-        <input type="hidden" name="action" value="reset">
-        <button type="submit" name="reset" class="btn btn-danger w-100">
-            Reset Game
-        </button>
-    </form>
     <?php
 }
 
