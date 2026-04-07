@@ -79,16 +79,32 @@ function handleStart()
     $_SESSION['game']['maxTime'] = $_POST['time'];
     $difficulty = $_SESSION['game']['difficulty'] = $_POST['difficulty'];
 
+    if ($difficulty < 1 || $difficulty > 6) {
+        $difficulty = 1; // default to easy if invalid
+    }
+
     switch ($difficulty) {
         case '1': // Easy
             $_SESSION['game']['min'] = 1;
-            $_SESSION['game']['max'] = 50;
+            $_SESSION['game']['max'] = 10;
             break;
         case '2': // Medium
             $_SESSION['game']['min'] = 1;
-            $_SESSION['game']['max'] = 100;
+            $_SESSION['game']['max'] = 25;
             break;
         case '3': // Hard
+            $_SESSION['game']['min'] = 1;
+            $_SESSION['game']['max'] = 50;
+            break;
+        case '4': // Hard
+            $_SESSION['game']['min'] = 1;
+            $_SESSION['game']['max'] = 100;
+            break;
+        case '5': // Harder
+            $_SESSION['game']['min'] = 1;
+            $_SESSION['game']['max'] = 250;
+            break;
+        case '6': // Extreme
             $_SESSION['game']['min'] = 1;
             $_SESSION['game']['max'] = 500;
             break;
@@ -236,9 +252,12 @@ function startForm()
             <div class="mb-3">
                 <label class="form-label">Choose a difficulty:</label>
                 <select name="difficulty" class="form-select">
-                    <option value="1" selected>Easy (1-50)</option>
-                    <option value="2">Medium (1-100)</option>
-                    <option value="3">Hard (1-500)</option>
+                    <option value="1" selected>Easy (1-10)</option>
+                    <option value="2">Average (1-25)</option>
+                    <option value="3">Tough (1-50)</option>
+                    <option value="4">Hard (1-100)</option>
+                    <option value="5">Harder (1-250)</option>
+                    <option value="6">Extreme (1-500)</option>
                 </select>
             </div>
 

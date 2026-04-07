@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require_once('db.php'); // ensure $con is available
 
 // fetch all leaderboard entries
-$query = "SELECT * FROM leaderboard ORDER BY date DESC"; // newest first
+$query = "SELECT * FROM leaderboard ORDER BY attempts ASC"; // newest first
 $result = mysqli_query($con, $query);
 
 $leaderboard = [];

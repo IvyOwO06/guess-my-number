@@ -19,7 +19,7 @@ handleRequest();
     <style>
         html,
         body {
-            height: 100%;
+            /* height: 100%; */
         }
 
         .main-wrapper {
@@ -59,4 +59,4 @@ handleRequest();
 </html>
 
 <?php
-// dump($_SESSION);
+dump($_SESSION);
