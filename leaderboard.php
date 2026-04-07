@@ -12,77 +12,78 @@ require_once 'inc/headerFunctions.php';
 <head>
     <?php htmlHead(); ?>
     <style>
-        html,
-        body {
+        html, body {
             height: 100%;
-        }
-
-        .main-wrapper {
-            min-height: calc(100vh - 120px);
-            /* adjust based on header/footer height */
         }
     </style>
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-    <body class="d-flex flex-column min-vh-100">
+    <?php displayHeader(); ?>
 
-        <?php displayHeader(); ?>
+    <main class="flex-grow-1 container py-4">
 
-        <main class="flex-grow-1 container py-4">
-            <table class="table" id="leaderboard-table">
-                <thead>
+        <!-- Sort options -->
+        <div class="mb-3">
+            <label class="form-label me-3">Sort by:</label>
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="sortBy" id="sortByAttempts" value="attempts" checked>
+                <label class="form-check-label" for="sortByAttempts">Attempts</label>
+            </div>
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="sortBy" id="sortByTime" value="time">
+                <label class="form-check-label" for="sortByTime">Time</label>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle" id="leaderboard-table">
+                <thead class="table-dark">
                     <tr>
+                        <th>Rank</th>
                         <th>Name</th>
                         <th>Difficulty</th>
                         <th>Attempts</th>
-                        <th>Time</th>
+                        <th>Time (seconds)</th>
                         <th>Guesses</th>
                         <th>Date</th>
                     </tr>
                 </thead>
-                <tbody>
-
-                </tbody>
-                <tfoot>
-                    <tr></tr>
-                </tfoot>
+                <tbody></tbody>
             </table>
-        </main>
+        </div>
 
-        <script id="leaderboard-template" type="x-tmpl-mustache">
-            <tr>
-                <td>{{entry.username}}</td>
-                <td>{{entry.difficulty}}</td>
-                <td>{{entry.attempts}}</td>
-                <td>{{entry.maxTime(s)}}</td>
-                <td>{{entry.guesses}}</td>
-                <td>{{entry.date}}</td>
-            </tr>
-        </script>
+    </main>
 
-        <?php
-        displayFooter();
-        ?>
+    <!-- Mustache template -->
+    <script id="leaderboard-template" type="x-tmpl-mustache">
+        <tr>
+            <td>{{entry.rank}}.</td>
+            <td>{{entry.username}}</td>
+            <td>{{entry.difficulty}}</td>
+            <td>{{entry.attempts}}</td>
+            <td>{{entry.maxTime(s)}}</td>
+            <td>{{entry.guesses}}</td>
+            <td>{{entry.date}}</td>
+        </tr>
+    </script>
 
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-            integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <?php displayFooter(); ?>
 
-        <!-- Bootstrap -->
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"
-            integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf"
-            crossorigin="anonymous"></script>
+    <!-- jQuery (optional if your JS needs it) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-            crossorigin="anonymous"></script>
+    <!-- Bootstrap 5 ONLY -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Mustache JS -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
+    <!-- Mustache -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
 
-        <script src="js/leaderboard.js"></script>
-    </body>
+    <script src="js/leaderboard.js"></script>
 
+</body>
 </html>
