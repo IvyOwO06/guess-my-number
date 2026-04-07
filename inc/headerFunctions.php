@@ -51,7 +51,7 @@ function displayFooter()
     ?>
     <footer class="bg-dark text-white text-center py-3 mt-auto">
         <div class="container">
-            CryptoMania - Sam Delhaye 2026 &copy;
+            Guess My Number - Sam Delhaye 2026 &copy;
         </div>
     </footer>
     <?php

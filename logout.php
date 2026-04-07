@@ -1,6 +1,6 @@
 <?php
 
-require_once('includes/session.php');
+require_once('inc/session.php');
 
 // unsets the user form the session variable (logs the user out) and redirects the user to the homepage
 unset($_SESSION['user']);
