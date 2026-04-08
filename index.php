@@ -54,9 +54,50 @@ handleRequest();
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 
+    <script>
+        let totalTime = <?php echo $_SESSION['game']['maxTime']; ?>;
+        let remaining = <?php echo $remaining; ?>;
+        let interval = setInterval(() => {
+            remaining--;
+
+            if (remaining <= 0) {
+                remaining = 0;
+                clearInterval(interval);
+                window.location.href = "newGame.php";
+            }
+
+            let percentage = (remaining / totalTime) * 100;
+
+            // Update text
+            document.getElementById("timeText").innerText = remaining + "s";
+
+            // Update bar width
+            let bar = document.getElementById("progressbar");
+            bar.style.width = percentage + "%";
+
+            // Update color dynamically
+            bar.classList.remove("bg-success", "bg-warning", "bg-danger");
+            document.getElementById("timeText").classList.remove("bg-success", "bg-warning", "bg-danger");
+
+            if (percentage < 20) {
+                bar.classList.add("bg-danger");
+                document.getElementById("timeText").classList.add("text-danger");
+            } else if (percentage < 40) {
+                bar.classList.add("bg-warning");
+                document.getElementById("timeText").classList.add("text-warning");
+            } else {
+                bar.classList.add("bg-success");
+                document.getElementById("timeText").classList.add("text-success");
+            }
+
+        }, 1000);
+    </script>
 </body>
 
 </html>
+
+
+
 
 <?php
 // dump($_SESSION);

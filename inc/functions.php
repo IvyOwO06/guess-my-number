@@ -234,7 +234,7 @@ function startForm()
                     <input type="number" class="form-control" name="attempts" min="1" value="5">
                 </div>
                 <div class="col">
-                    <label class="form-label">Time per Attempt (seconds):</label>
+                    <label class="form-label">Time per Game (seconds):</label>
                     <input type="number" class="form-control" name="time" min="1" value="15">
                 </div>
             </div>
@@ -278,7 +278,11 @@ function gameForm()
                 <div class="alert alert-info"><?= $_SESSION['message'] ?></div>
             <?php endif; ?>
 
-            <p><strong>Elapsed Time:</strong> <?= $_SESSION['game']['elapsedTime'] ?>s</p>
+            <p><strong>Elapsed Time:</strong> <span id="timeText">0</span></p>
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+                    aria-valuemax="100"></div>
+            </div><br>
 
             <form method="post" class="mb-3">
                 <div class="input-group">
@@ -308,6 +312,12 @@ function gameForm()
         </div>
     </div>
     <?php
+
+    global $remaining;
+    $remaining = $_SESSION['game']['maxTime'] - (time() - $_SESSION['game']['startTime']);
+    $remaining = max(0, min($_SESSION['game']['maxTime'], $remaining));
+    $percentage = ($remaining / $_SESSION['game']['maxTime']) * 100;
+
 }
 
 function dump($var)
