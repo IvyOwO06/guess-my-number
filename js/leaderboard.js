@@ -1,8 +1,8 @@
-function getLeaderboard(what) {
-    console.log("Fetching leaderboard sorted by:", what);
+function getLeaderboard(sortBy) {
+    console.log("Fetching leaderboard sorted by:", sortBy);
     $.ajax({
         type: "GET",
-        url: "inc/get_leaderboard_db.php?sortBy=" + what, // your PHP script
+        url: "inc/get_leaderboard_db.php?sortBy=" + sortBy, // your PHP script
         dataType: "json",
         success: function (data) {
             // data is an array of leaderboard entries

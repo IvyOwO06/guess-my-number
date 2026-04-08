@@ -7,15 +7,15 @@ require_once('db.php');
 $allowedSorts = ['attempts', 'maxTime(s)'];
 
 // get input
-$what = $_GET['sortBy'] ?? 'attempts';
+$sortBy = $_GET['sortBy'] ?? 'attempts';
 
 // validate input
-if (!in_array($what, $allowedSorts)) {
-    $what = 'attempts';
+if (!in_array($sortBy, $allowedSorts)) {
+    $sortBy = 'attempts';
 }
 
 // query
-$query = "SELECT * FROM leaderboard ORDER BY `$what` ASC";
+$query = "SELECT * FROM leaderboard ORDER BY `$sortBy` ASC";
 $result = mysqli_query($con, $query);
 
 $leaderboard = [];
