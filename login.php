@@ -63,24 +63,3 @@ if (isset($_SESSION['user'])) {
 </body>
 
 </html>
-
-
-
-
-
-<!-- <main>
-        <h2>LOGIN</h2>
-        <form method="post" action="includes/login_process.php">
-            <div class="form-group">
-                <label>User Name</label>
-                <input type="text" class="form-control" name="username" id="username" placeholder="Enter username"><br>
-            </div>
-
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" class="form-control" name="password" id="password" placeholder="Enter password"><br>
-            </div>
-            <button class="btn btn-primary" id="login-btn" type="submit">Login</button>
-            <a href="register.php" class="small-button">Sign Up</a>
-        </form>
-    </main> -->
