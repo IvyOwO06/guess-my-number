@@ -64,8 +64,6 @@ function handleRequest()
 function handleStart()
 {
     $_SESSION['game']['gameStarted'] = true;
-    $_SESSION['game']['min'] = $_POST['min'] ?? 1;
-    $_SESSION['game']['max'] = $_POST['max'] ?? 100;
     $_SESSION['game']['maxAttempts'] = $_POST['attempts'] ?? 5;
     $_SESSION['game']['maxTime'] = $_POST['time'] ?? 15;
     $_SESSION['game']['difficulty'] = $_POST['difficulty'] ?? 1;
@@ -95,6 +93,10 @@ function handleStart()
         case '6':
             $_SESSION['game']['min'] = 1;
             $_SESSION['game']['max'] = 500;
+            break;
+        default:
+            $_SESSION['game']['min'] = 1;
+            $_SESSION['game']['max'] = 10;
             break;
     }
 
